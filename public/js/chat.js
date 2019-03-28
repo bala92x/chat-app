@@ -88,13 +88,22 @@ $sendLocationButton.addEventListener('click', () => {
 
     $sendLocationButton.setAttribute('disabled', 'disabled');
     
-    navigator.geolocation.getCurrentPosition((position) => {
+    const onSuccess = (position) => {
         const { latitude, longitude } = position.coords;
 
         socket.emit('sendLocation', { latitude, longitude }, () => {
             $sendLocationButton.removeAttribute('disabled');
         });
-    });
+    };
+
+    const onError = (error) => {
+        if (error.code == error.PERMISSION_DENIED) {
+            $sendLocationButton.removeAttribute('disabled');
+            return alert('You must enable geolocation to send your location.');
+        }
+    };
+
+    navigator.geolocation.getCurrentPosition(onSuccess, onError);
 });
 
 socket.emit('join', { username, room }, (error) => {
